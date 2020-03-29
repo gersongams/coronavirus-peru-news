@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup
 import datetime
 import re
 
-x = datetime.datetime(2020, 5, 17)
-
 
 def website_fetcher(url):
     page = requests.get(url)
@@ -47,5 +45,5 @@ def format_time(time):
     hour = int(date_numbers[3])
     minute = int(date_numbers[4])
 
-    date = datetime.datetime(year,month,day,hour,minute)
+    date = datetime.datetime(year, month, day, hour, minute)
     return date.isoformat()
