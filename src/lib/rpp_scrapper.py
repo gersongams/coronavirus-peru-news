@@ -1,11 +1,12 @@
-from utils import website_fetcher, extract_articles
-import requests
-from bs4 import BeautifulSoup
+import json
 import unicodedata
+
+from utils import extract_articles, website_fetcher
 
 
 class RPPScrapper():
     diary = "RPP"
+    diary_id = "rpp"
     base_url_rpp = "https://rpp.pe"
     url_coronavirus_news = "https://rpp.pe/noticias/coronavirus?ref=rpp"
     soup = []
@@ -27,7 +28,6 @@ class RPPScrapper():
         title = story.find("h2").find("a")
         subtitle = story.find("p")
         description = unicodedata.normalize("NFKD", subtitle.get_text())
-
         return {
             "time": time.get("data-x"),
             "title": title.get_text(),
@@ -37,13 +37,25 @@ class RPPScrapper():
         }
 
     def get_internal_image(self, article_url):
-        article = requests.get(article_url)
-        article_soup = BeautifulSoup(article.content, 'html.parser')
+        article_soup = website_fetcher(article_url)
+        img_src = None
+        try:
+            picture = article_soup.find("div", {"class": "cover"})
+            img = picture.find("img")
+            img_src = img.get('src')
+        except Exception as ex:
+            print(article_url)
+            print(str(ex))
+            try:
+                picture = article_soup.find("div", {"class": "cover-fotogaleria"})
+                img = picture.find("img")
+                content = json.loads(img.get('data-x'))
+                img_src = content.get('content')
+            except:
+                img_src = ''
+        finally:
+            return img_src
 
-        picture = article_soup.find("div", {"class": "cover"})
-        img = picture.find("img")
-
-        return img.get('src')
 
     def build_json_articles(self):
         self.articles = extract_articles(
@@ -55,6 +67,7 @@ class RPPScrapper():
         self.build_json_articles()
 
         return {
+            "diary_id": self.diary_id,
             "diary": self.diary,
             "articles": self.articles
         }

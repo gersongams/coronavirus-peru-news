@@ -1,0 +1,32 @@
+org: gersongams
+app: covid-19-news
+service: coronavirus-peru-news
+
+provider:
+  name: aws
+  runtime: python3.8
+
+package:
+  individually: true
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+    slim: true
+
+functions:
+  get_all_news:
+    handler: src/handler.get_all_news
+    events:
+      - http:
+          path: all_news
+          method: get
+  get_news_from:
+    handler: src/handler.get_news_from
+    events:
+      - http:
+          path: news_from
+          method: get

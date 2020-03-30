@@ -1,11 +1,11 @@
-from utils import website_fetcher, extract_articles
-import requests
-from bs4 import BeautifulSoup
 import unicodedata
+
+from utils import extract_articles, website_fetcher
 
 
 class Peru21Scrapper():
     diary = "Perú21"
+    diary_id = "peru21"
     base_url_peru21 = "https://peru21.pe"
     url_coronavirus_news = "https://peru21.pe/noticias/coronavirus/"
     soup = []
@@ -37,14 +37,16 @@ class Peru21Scrapper():
             "subtitle": description,
             "article_url": article_url
         }
-    
+
     def get_internal_data(self, article_url):
-        article = requests.get(article_url)
-        article_soup = BeautifulSoup(article.content, 'html.parser')
+        article_soup = website_fetcher(article_url)
         try:
             picture = article_soup.find("picture")
-            img = picture.find(
-                "source", {"media": "(max-width: 320px)"}).get('srcset')
+            if article_soup.find("div", {"id": "powa-default"}):
+                img = article_soup.find("div", {"id": "powa-default"}).get('data-poster')
+            else:
+                img = picture.find(
+                    "source", {"media": "(max-width: 320px)"}).get('srcset')
         except:
             img = ""
         time = article_soup.find("time").get("datetime")
@@ -61,6 +63,7 @@ class Peru21Scrapper():
         self.build_json_articles()
 
         return {
+            "diary_id": self.diary_id,
             "diary": self.diary,
             "articles": self.articles
         }

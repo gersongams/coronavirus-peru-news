@@ -1,13 +1,13 @@
-from utils import website_fetcher, extract_articles
-import requests
-from bs4 import BeautifulSoup
 import unicodedata
 
+from utils import extract_articles, website_fetcher
 
-class CorreoScrapper():
-    diary = "Correo"
-    base_url_correo = "https://diariocorreo.pe"
-    url_coronavirus_news = "https://diariocorreo.pe/noticias/coronavirus/"
+
+class ElComercioScrapper():
+    diary = "El Comercio"
+    diary_id = "el_comercio"
+    base_url_elComercio = "https://elcomercio.pe"
+    url_coronavirus_news = "https://elcomercio.pe/noticias/coronavirus-peru/"
     soup = []
     articles = []
     articles_soup = []
@@ -25,9 +25,11 @@ class CorreoScrapper():
     def get_data_from_articles(self, story):
         title = story.find("a", {"class": "story-item__title"})
         subtitle = story.find("p", {"class": "story-item__subtitle"})
-        article_url = self.base_url_correo + title.get('href')
-        img_src, time = self.get_internal_data(article_url)
         description = unicodedata.normalize("NFKD", subtitle.get_text())
+
+        article_url = self.base_url_elComercio + title.get('href')
+        img_src, time = self.get_internal_data(article_url)
+
 
         return {
             "time": time,
@@ -37,9 +39,9 @@ class CorreoScrapper():
             "article_url": article_url
         }
 
+
     def get_internal_data(self, article_url):
-        article = requests.get(article_url)
-        article_soup = BeautifulSoup(article.content, 'html.parser')
+        article_soup = website_fetcher(article_url)
         try:
             picture = article_soup.find("picture")
             img = picture.find(
@@ -60,6 +62,7 @@ class CorreoScrapper():
         self.build_json_articles()
 
         return {
+            "diary_id": self.diary_id,
             "diary": self.diary,
             "articles": self.articles
         }

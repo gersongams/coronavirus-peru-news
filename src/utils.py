@@ -1,20 +1,34 @@
-import requests
-from bs4 import BeautifulSoup
 import datetime
 import re
 
+import requests
+from bs4 import BeautifulSoup
+
 
 def website_fetcher(url):
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    return soup
-
+    soup = None
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
+    }
+    try:
+        r = requests.get(url, headers=headers)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.content, 'html.parser')
+    except Exception as ex:
+        print(str(ex))
+    finally:
+        return soup
 
 def extract_articles(articles_soup, extract_function):
     articles = []
     for article in articles_soup:
-        article_json = extract_function(article)
-        articles.append(article_json)
+        try:
+            article_json = extract_function(article)
+            articles.append(article_json)
+        except Exception as ex:
+            print(str(ex))
+        finally:
+            pass
 
     return articles
 

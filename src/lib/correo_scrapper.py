@@ -1,12 +1,13 @@
-from utils import website_fetcher, extract_articles
 import unicodedata
-import requests
-from bs4 import BeautifulSoup
 
-class ElComercioScrapper():
-    diary = "El Comercio"
-    base_url_elComercio = "https://elcomercio.pe"
-    url_coronavirus_news = "https://elcomercio.pe/noticias/coronavirus-peru/"
+from utils import extract_articles, website_fetcher
+
+
+class CorreoScrapper():
+    diary = "Correo"
+    diary_id = "correo"
+    base_url_correo = "https://diariocorreo.pe"
+    url_coronavirus_news = "https://diariocorreo.pe/noticias/coronavirus/"
     soup = []
     articles = []
     articles_soup = []
@@ -24,11 +25,9 @@ class ElComercioScrapper():
     def get_data_from_articles(self, story):
         title = story.find("a", {"class": "story-item__title"})
         subtitle = story.find("p", {"class": "story-item__subtitle"})
-        description = unicodedata.normalize("NFKD", subtitle.get_text())
-
-        article_url = self.base_url_elComercio + title.get('href')
+        article_url = self.base_url_correo + title.get('href')
         img_src, time = self.get_internal_data(article_url)
-
+        description = unicodedata.normalize("NFKD", subtitle.get_text())
 
         return {
             "time": time,
@@ -38,14 +37,15 @@ class ElComercioScrapper():
             "article_url": article_url
         }
 
-    
     def get_internal_data(self, article_url):
-        article = requests.get(article_url)
-        article_soup = BeautifulSoup(article.content, 'html.parser')
+        article_soup = website_fetcher(article_url)
         try:
             picture = article_soup.find("picture")
-            img = picture.find(
-                "source", {"media": "(max-width: 320px)"}).get('srcset')
+            img_container = picture.find("source", {"media": "(max-width: 320px)"})
+            if picture.find("source", {"class": "lazy"}):
+                img = img_container.get('data-srcset')
+            else:
+                img = img_container.get('srcset')
         except:
             img = ""
         time = article_soup.find("time").get("datetime")
@@ -62,6 +62,7 @@ class ElComercioScrapper():
         self.build_json_articles()
 
         return {
+            "diary_id": self.diary_id,
             "diary": self.diary,
             "articles": self.articles
         }
