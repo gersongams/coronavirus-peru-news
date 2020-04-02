@@ -47,15 +47,16 @@ class RPPScrapper():
             print(article_url)
             print(str(ex))
             try:
-                picture = article_soup.find("div", {"class": "cover-fotogaleria"})
+                picture = article_soup.find(
+                    "div", {"class": "cover-fotogaleria"})
                 img = picture.find("img")
                 content = json.loads(img.get('data-x'))
                 img_src = content.get('content')
             except:
-                img_src = ''
+                img = article_soup.find("meta",  property="og:image")
+                img_src = img.get('content')
         finally:
             return img_src
-
 
     def build_json_articles(self):
         self.articles = extract_articles(

@@ -19,7 +19,13 @@ def get_all_news(event, context):
         "body": json.dumps(body, ensure_ascii=False)
     }
 
+    response["headers"] = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    }
+
     return response
+
 
 def get_news_from(event, context):
     diary = event['queryStringParameters']['diary']
@@ -35,6 +41,11 @@ def get_news_from(event, context):
     response = {
         "statusCode": 200,
         "body": json.dumps(body, ensure_ascii=False)
+    }
+
+    response["headers"] = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
     }
 
     return response
