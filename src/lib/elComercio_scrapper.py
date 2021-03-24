@@ -42,15 +42,11 @@ class ElComercioScrapper():
 
     def get_internal_data(self, article_url):
         article_soup = website_fetcher(article_url)
-        try:
-            picture = article_soup.find("picture")
-            img = picture.find(
-                "source", {"media": "(max-width: 320px)"}).get('srcset')
-        except:
-            img = ""
+        img = article_soup.find("meta",  property="og:image")
+        img_src = img.get('content')
         time = article_soup.find("time").get("datetime")
 
-        return img, time
+        return img_src, time
 
     def build_json_articles(self):
         self.articles = extract_articles(

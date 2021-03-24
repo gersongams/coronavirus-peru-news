@@ -39,13 +39,8 @@ class LaRepublicaScrapper():
 
     def get_internal_image(self, article_url):
         article_soup = website_fetcher(article_url)
-        try:
-            picture = article_soup.find("picture")
-            img = picture.find("source", {"media": "(max-width: 320px)"})
-            return img.get('srcset')
-        except:
-            img = article_soup.find("meta",  property="og:image")
-            return img.get('content')
+        img = article_soup.find("meta",  property="og:image")
+        return img.get('content')
 
     def build_json_articles(self):
         self.articles = extract_articles(

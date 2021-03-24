@@ -28,35 +28,19 @@ class RPPScrapper():
         title = story.find("h2").find("a")
         subtitle = story.find("p")
         description = unicodedata.normalize("NFKD", subtitle.get_text())
+        article_url = title.get('href')
         return {
             "time": time.get("data-x"),
             "title": title.get_text(),
-            "img_src": self.get_internal_image(title.get('href')),
+            "img_src": self.get_internal_image(article_url),
             "subtitle": description,
-            "article_url": title.get('href')
+            "article_url": article_url
         }
 
     def get_internal_image(self, article_url):
         article_soup = website_fetcher(article_url)
-        img_src = None
-        try:
-            picture = article_soup.find("div", {"class": "cover"})
-            img = picture.find("img")
-            img_src = img.get('src')
-        except Exception as ex:
-            print(article_url)
-            print(str(ex))
-            try:
-                picture = article_soup.find(
-                    "div", {"class": "cover-fotogaleria"})
-                img = picture.find("img")
-                content = json.loads(img.get('data-x'))
-                img_src = content.get('content')
-            except:
-                img = article_soup.find("meta",  property="og:image")
-                img_src = img.get('content')
-        finally:
-            return img_src
+        img = article_soup.find("meta",  property="og:image")
+        img_src = img.get('content')
 
     def build_json_articles(self):
         self.articles = extract_articles(
